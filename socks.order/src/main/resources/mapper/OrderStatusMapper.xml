@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scoks.order.mapper.OrderStatusMapper">
+
+    <update id="updateTargetNum">
+        update order_status set target_num = if(target_num + #{num} &lt;0,0,target_num + #{num}),update_time = #{updateTime}
+        where order_id = #{id}
+    </update>
+    <update id="updateOutTargetNum">
+        update order_status set out_target_num = if(out_target_num + #{num} &lt;0,0,out_target_num + #{num}),update_time = #{updateTime}
+        where order_id = #{id}
+    </update>
+    <update id="updateOutCompletedNum">
+        update order_status set out_completed_num = if(out_completed_num + #{num} &lt;0,0,out_completed_num + #{num}),update_time = #{updateTime}
+        where order_id = #{id}
+    </update>
+
+
+    <update id="updateCompletedNum">
+        update order_status set completed_num = if(completed_num + #{num} &lt;0,0,completed_num + #{num}),update_time = #{updateTime}
+        where order_id = #{id}
+    </update>
+    <update id="updateFinalizeNum">
+        update order_status set finalize_num = if(finalize_num + #{num} &lt;0,0,finalize_num + #{num}),update_time = #{updateTime}
+        where order_id = #{id}
+    </update>
+
+</mapper>

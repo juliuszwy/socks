@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="utf-8">
+    <title>帐号管理 | 新增（更新）帐号</title>
+    <div th:include="../templates/head :: head"></div>
+    <script type="text/javascript" th:src="@{/static/js/jquery.form.js}"></script>
+</head>
+<body>
+<div class="easyui-layout" style="text-align: center; height: 270px;" fit="true">
+    <div region="center" border="false" style="padding: 10px; background: #fff; border: 1px solid #ccc;">
+        <form id="ff" method="post">
+            <table>
+                <input type="hidden"  name="id" th:value="${user.id }"/>
+                <tr>
+                    <td><label th:for="loginName">登陆名:</label></td>
+                    <td><input class="easyui-validatebox" th:type="text" th:name="loginName" th:value="${user.loginName }" data-options="required:true,validType:'length[1,25]'"/></td>
+                </tr>
+                <tr>
+                    <td><label th:for="pwd">密码:</label></td>
+                    <td><input class="easyui-validatebox" th:type="password" th:name="pwd" th:value="${user.pwd }" data-options="required:true,validType:'minLength[6]'"/></td>
+                </tr>
+                <tr>
+                    <td><label th:for="phone">手机号:</label></td>
+                    <td><input class="easyui-validatebox" th:type="text" th:name="phone" th:value="${user.phone }" data-options="required:false"/></td>
+                </tr>
+                <tr>
+                    <td><label  class="label">角色:</label></td>
+                    <td>
+                        <select  name="role"  style="width:175px;">
+                            <option th:value="1" th:selected="${user.role == 1}">平台管理员</option>
+                            <option th:value="2" th:selected="${user.role == 2}">游戏管理员</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td><label  class="label">状态:</label></td>
+                    <td>
+                        <select  name="state"  style="width:175px;">
+                            <option th:value="0" th:selected="${user.state == 0}">启用</option>
+                            <option th:value="1" th:selected="${user.state == 1}">禁用</option>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div region="south" border="false" style="text-align: center; padding: 5px 5px 5px 0;">
+        <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm('admin_edit');">确认</a>
+    </div>
+</div>
+<script type="text/javascript">
+    $.extend($.fn.validatebox.defaults.rules, {
+        minLength: {
+            validator: function(value, param){
+                return value.length >= param[0];
+            },
+            message: 'Please enter at least {0} characters.'
+        }
+    });
+</script>
+</body>
+</html>

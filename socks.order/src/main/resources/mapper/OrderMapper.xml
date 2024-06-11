@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scoks.order.mapper.OrderMapper">
+
+    <resultMap id="BaseResultMap" type="com.scoks.order.entity.Order">
+        <id column="id" property="id"/>
+        <result column="order_id" property="orderId"/>
+        <result column="customer_id" property="customerId"/>
+        <result column="salesman_id" property="salesmanId"/>
+        <result column="delivery_date" property="deliveryDate"/>
+        <result column="urgent" property="urgent"/>
+        <result column="device" property="device"/>
+        <result column="sewing_head" property="sewingHead"/>
+        <result column="materials" property="materials"/>
+        <result column="other" property="other"/>
+        <result column="desc" property="desc"/>
+        <result column="ext1" property="ext1"/>
+        <result column="ext2" property="ext2"/>
+        <result column="creator" property="creator"/>
+        <result column="state" property="state"/>
+        <result column="urgent_time" property="urgentTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+
+        <result column="salesmanName" property="salesmanName"/>
+        <result column="customerName" property="customerName"/>
+
+
+        <result column="target_num" property="orderStatus.targetNum"/>
+        <result column="completed_num" property="orderStatus.completedNum"/>
+        <result column="out_target_num" property="orderStatus.outTargetNum"/>
+        <result column="out_completed_num" property="orderStatus.outCompletedNum"/>
+        <result column="finalize_num" property="orderStatus.finalizeNum"/>
+        <result column="finalize_state" property="orderStatus.finalizeState"/>
+        <result column="produce_state" property="orderStatus.produceState"/>
+    </resultMap>
+
+    <resultMap id="OrderMaterialLackDetailMap" type="com.scoks.order.dto.OrderMaterialLackDTO">
+        <result column="order_id" property="orderId"/>
+        <result column="material_id" property="material.id"/>
+        <result column="category" property="material.category"/>
+        <result column="colour" property="material.colour"/>
+        <result column="lackNum" property="lackNum"/>
+    </resultMap>
+
+
+    <insert id="insertOrder" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        INSERT INTO `order`(order_id, customer_id, salesman_id,delivery_date,urgent,device,sewing_head,materials,other,`desc`,ext1,ext2,creator,state,urgent_time,create_time,update_time)
+        SELECT #{orderId},#{customerId},#{salesmanId},#{deliveryDate},#{urgent},#{device},#{sewingHead},#{materials},#{other},#{desc},#{ext1},#{ext2},#{creator},#{state},#{urgentTime},#{createTime},#{updateTime}
+        FROM DUAL WHERE NOT EXISTS(SELECT id FROM`order` WHERE order_id = #{orderId} and customer_id = #{customerId} and state = 0)
+    </insert>
+
+
+    <select id="listOrder" resultMap="BaseResultMap">
+        select a.* ,b.name AS salesmanName ,c.name AS customerName
+        ,d.target_num,d.completed_num,d.out_target_num,d.out_completed_num,d.finalize_num,d.finalize_state,d.produce_state
+        from `order` a
+        LEFT join staff b on a.salesman_id = b.id
+        LEFT join customer c on a.customer_id = c.id
+        LEFT join order_status d on a.id = d.order_id
+        <if test="where.itemNum !=null">
+            LEFT join order_product e on a.id = e.order_id
+        </if>
+        where 1=1
+        <if test="where.salesmanName!=null">
+            and b.name like concat('%',#{where.salesmanName},'%')
+        </if>
+        <if test="where.customerName!=null">
+            and c.name like concat('%',#{where.customerName},'%')
+        </if>
+        <if test="where.salesmanId!=null">
+            and a.salesman_id = #{where.salesmanId}
+        </if>
+        <if test="where.customerId!=null">
+            and a.customer_id = #{where.customerId}
+        </if>
+        <if test="where.state!=null">
+            and a.state = #{where.state}
+        </if>
+        <if test="where.state == null">
+            and a.state = 0
+        </if>
+
+        <if test="where.wbd != null">
+            and TRUNCATE((d.completed_num + d.out_completed_num)/d.target_num,4) > 0.97
+        </if>
+
+        <if test="where.orderId!=null">
+            and a.order_id like concat('%',#{where.orderId},'%')
+        </if>
+        <if test="where.id!=null">
+            and a.id = #{where.id}
+        </if>
+
+        <if test="where.out !=null">
+            and d.out_target_num > 0
+        </if>
+
+        <if test="where.produceState != null">
+            and d.produce_state = #{where.produceState}
+        </if>
+
+        <if test="where.finalizeState != null">
+            and d.finalize_state = #{where.finalizeState}
+        </if>
+
+        <if test="where.itemNum !=null">
+            and e.item_num like concat('%',#{where.itemNum},'%')
+            group by a.id
+        </if>
+        order by a.update_time desc
+    </select>
+
+
+    <select id="getOrder" resultType="com.scoks.order.entity.Order">
+        select a.* ,b.name AS salesmanName ,c.name AS customerName from `order` a
+        LEFT join staff b on a.salesman_id = b.id
+        LEFT join customer c on a.customer_id = c.id
+        where a.id = #{id}
+    </select>
+
+
+    <select id="selectOrderMaterialLackDetail" resultMap="OrderMaterialLackDetailMap">
+        select a.order_id,b.material_id,d.category,d.colour
+             ,sum(if(b.target_num>b.get_num,b.target_num - b.get_num,0)) AS lackNum
+        from `order` a
+                 left join order_product_material b on a.order_id = b.order_id
+                 left join order_status c on a.order_id = c.order_id
+                 left join material d on b.material_id = d.id
+        where c.produce_state = 0 and b.material_id = #{materialId}
+        group by a.order_id,b.material_id
+        order by a.update_time desc
+    </select>
+</mapper>

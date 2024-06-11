@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scoks.order.mapper.OrderProductOutMapper">
+
+    <select id="pageProductOut" resultType="com.scoks.order.entity.OrderProductOut">
+        select a.* ,b.name AS partnerName from `order_product_out` a
+        LEFT join partner b on a.partner_id = b.id
+        where product_id = #{where.productId} and a.state = 0
+        <if test="where.partnerName!=null">
+            and b.name like concat('%',#{where.partnerName},'%')
+        </if>
+        order by a.update_time desc
+    </select>
+
+
+</mapper>

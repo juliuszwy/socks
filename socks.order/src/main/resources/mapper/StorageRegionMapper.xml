@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scoks.order.mapper.StorageRegionMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.scoks.order.entity.StorageRegion">
+        <id column="id" property="id"/>
+        <result column="region" property="region"/>
+        <result column="tray" property="tray"/>
+        <result column="operator" property="operator"/>
+        <result column="remarks" property="remarks"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+
+        <result column="materialTypeNum" property="materialTypeNum"/>
+    </resultMap>
+    <select id="findStorageRegionPageList" resultMap="BaseResultMap">
+        SELECT a.*,count(b.id) AS materialTypeNum from storage_region a
+        left join storage_tray_material b on a.tray = b.tray
+        where 1=1
+        <if test="where.tray!=null">
+            and a.`tray` = #{where.tray}
+        </if>
+        group by a.tray
+        order by a.tray
+    </select>
+
+
+</mapper>

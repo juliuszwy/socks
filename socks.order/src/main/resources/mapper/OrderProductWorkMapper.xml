@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scoks.order.mapper.OrderProductWorkMapper">
+
+    <select id="listOrderProductWork" resultType="com.scoks.order.entity.OrderProductWork">
+        select a.* ,d.name AS workName ,c.pin_num AS pinNum,c.pin_type AS pinType
+        ,b.machine_num AS machineNum
+        from `order_product_work` a
+        LEFT join machine_info b on a.machine_id = b.id
+        LEFT join machine_model c on b.model = c.id
+        LEFT join staff d on a.worker = d.id
+        where a.state = 0
+        <if test="where.productId!=null">
+            and product_id = #{where.productId}
+        </if>
+        <if test="where.machineNum!=null">
+            and b.machine_num = #{where.machineNum}
+        </if>
+        <if test="where.pinNum!=null">
+            and c.pin_num = #{where.pinNum}
+        </if>
+        <if test="where.pinType!=null">
+            and c.pin_type = #{where.pinType}
+        </if>
+
+        <if test="where.workName!=null">
+            and d.name like concat('%',#{where.workName},'%')
+        </if>
+        <if test="where.startTime!=null">
+            and a.work_time > #{where.startTime}
+        </if>
+        <if test="where.endTime!=null">
+            and #{where.endTime} > a.work_time
+        </if>
+        order by a.update_time desc
+    </select>
+    <select id="sumMachineWork" resultType="com.scoks.order.dto.MachineWorkSum">
+        select sum(a.completed) AS `sum`
+        <if test="sumType == null or (sumType!=null and sumType==1)">
+            ,b.machine_num,c.pin_num AS pinNum,c.pin_type
+        </if>
+        <if test="sumType!=null and sumType==2">
+            ,c.pin_type
+        </if>
+        from order_product_work a
+        LEFT join machine_info b on a.machine_id = b.id
+        LEFT join machine_model c on b.model = c.id
+        LEFT join staff d on a.worker = d.id
+        where a.state = 0 and a.work_time BETWEEN #{startTime} and #{endTime}
+        and a.machine_id > 0
+        <if test="machineNum!=null">
+            and b.machine_num = #{machineNum}
+        </if>
+        <if test="pinNum!=null">
+            and c.pin_num = #{pinNum}
+        </if>
+        <if test="pinType!=null">
+            and c.pin_type = #{pinType}
+        </if>
+        <if test="workName!=null">
+            and d.name like concat('%',#{workName},'%')
+        </if>
+
+        <if test="sumType == null or (sumType!=null and sumType==1)">
+            group by a.machine_id
+        </if>
+        <if test="sumType!=null and sumType==2">
+            group by c.pin_type,c.pin_num
+        </if>
+    </select>
+</mapper>

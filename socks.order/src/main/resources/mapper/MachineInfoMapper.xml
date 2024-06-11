@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scoks.order.mapper.MachineInfoMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.scoks.order.entity.MachineInfo">
+        <id column="id" property="id"/>
+        <result column="num" property="num"/>
+        <result column="model" property="model"/>
+        <result column="remarks" property="remarks"/>
+        <result column="creator" property="creator"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+
+
+        <result column="pin_num" property="machineModel.pinNum"/>
+        <result column="pin_type" property="machineModel.pinType"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, num, model, remarks, creator, create_time, update_time
+    </sql>
+
+
+    <select id="listMachineInfo" resultMap="BaseResultMap">
+        select a.* ,b.pin_num AS pin_num ,b.pin_type AS pin_type
+        from `machine_info` a
+        LEFT join machine_model b on a.model = b.id
+        where 1=1
+        <if test="where.machineNum!=null">
+            and a.machine_num like concat('%',#{where.machineNum},'%')
+        </if>
+
+        <if test="where.pinNum!=null">
+            and b.pin_num = #{where.pinNum}
+        </if>
+        <if test="where.pinType!=null">
+            and b.pin_type = #{where.pinType}
+        </if>
+    </select>
+
+</mapper>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="utf-8">
+    <title>修改用户账户信息</title>
+    <div th:include="../templates/head :: head"></div>
+    <script type="text/javascript" th:src="@{/static/js/jquery.form.js}"></script>
+    <script>
+        function submit_form() {
+            submitForm('user_edit');
+            $('#ff').form('reset');
+        }
+    </script>
+</head>
+<body>
+<div class="easyui-layout" style="text-align: center; height: 270px;" fit="true">
+    <div region="center" border="false" style="padding: 10px; background: #fff; border: 1px solid #ccc;">
+        <form id="ff" method="post">
+            <table>
+                <tr>
+                    <td><label th:for="id">用户ID:</label></td>
+                    <td><input th:type="text"  name="id" class="easyui-numberbox" data-options="required:true"/></td>
+                </tr>
+                <tr>
+                    <td><label th:for="btc">BTC:</label></td>
+                    <td><input class="easyui-numberbox" th:type="text" name="btc"/></td>
+                <tr>
+                <tr>
+                    <td><label th:for="ltc">LTC:</label></td>
+                    <td><input class="easyui-numberbox" th:type="text" name="ltc" /></td>
+                <tr>
+                <tr>
+                    <td><label th:for="eth">ETH:</label></td>
+                    <td><input class="easyui-numberbox" th:type="text" name="eth" /></td>
+                <tr>
+                <tr>
+                    <td><label th:for="bbk">BBK:</label></td>
+                    <td><input class="easyui-numberbox" th:type="text" name="bbk"  /></td>
+                <tr>
+                <tr>
+                    <td><label th:for="excessTimes">当日游戏次数:</label></td>
+                    <td><input class="easyui-numberbox" th:type="text" name="gameTimes"/></td>
+                <tr>
+            </table>
+        </form>
+        <div region="south" border="false" style="text-align: left; padding: 5px 5px 5px 0;">
+            <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submit_form();">确认</a>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

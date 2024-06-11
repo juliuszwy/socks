@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <title>系统</title>
+    <base th:href="${#request.getContextPath()}+'/'">
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <div th:include="../templates/head :: head"></div>
+    <div th:include="../templates/index_css :: head"></div>
+    <script type="text/javascript">
+        function addTab(title, url){
+            if ($('#tabs').tabs('exists', title)) {
+                $('#tabs').tabs('select', title);//选中并刷新
+                var currTab = $('#tabs').tabs('getSelected');
+                var url = $(currTab.panel('options').content).attr('src');
+                if(url != undefined && currTab.panel('options').title != 'Home') {
+                    $('#tabs').tabs('update',{
+                        tab:currTab,
+                        options:{
+                            content:createFrame(url)
+                        }
+                    })
+                }
+            } else {
+                var content = createFrame(url);
+                $('#tabs').tabs('add',{
+                    title:title,
+                    content:content,
+                    closable:true
+                });
+            }
+            tabClose();
+        }
+        function createFrame(url) {
+            var s = '<iframe scrolling="auto" frameborder="0" src="' + url + '" style="width:100%;height:100%;"></iframe>';
+            return s;
+        }
+        function tabClose() {
+            /*双击关闭TAB选项卡*/
+            $(".tabs-inner").dblclick(function(){
+                var subtitle = $(this).children(".tabs-closable").text();
+                $('#tabs').tabs('close',subtitle);
+            })
+            /*为选项卡绑定右键*/
+            $(".tabs-inner").bind('contextmenu',function(e){
+                $('#mm').menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+                var subtitle =$(this).children(".tabs-closable").text();
+                $('#mm').data("currtab",subtitle);
+                $('#tabs').tabs('select',subtitle);
+                return false;
+            });
+        }
+        //绑定右键菜单事件
+        function tabCloseEven() {
+            //刷新
+            $('#mm-tabupdate').click(function(){
+                var currTab = $('#tabs').tabs('getSelected');
+                var url = $(currTab.panel('options').content).attr('src');
+                if(url != undefined && currTab.panel('options').title != 'Home') {
+                    $('#tabs').tabs('update',{
+                        tab:currTab,
+                        options:{
+                            content:createFrame(url)
+                        }
+                    })
+                }
+            })
+            //关闭当前
+            $('#mm-tabclose').click(function(){
+                var currtab_title = $('#mm').data("currtab");
+                $('#tabs').tabs('close',currtab_title);
+            })
+            //全部关闭
+            $('#mm-tabcloseall').click(function(){
+                $('.tabs-inner span').each(function(i,n){
+                    var t = $(n).text();
+                    if(t != 'Home') {
+                        $('#tabs').tabs('close',t);
+                    }
+                });
+            });
+            //关闭除当前之外的TAB
+            $('#mm-tabcloseother').click(function(){
+                var prevall = $('.tabs-selected').prevAll();
+                var nextall = $('.tabs-selected').nextAll();
+                if(prevall.length>0){
+                    prevall.each(function(i,n){
+                        var t=$('a:eq(0) span',$(n)).text();
+                        if(t != 'Home') {
+                            $('#tabs').tabs('close',t);
+                        }
+                    });
+                }
+                if(nextall.length>0) {
+                    nextall.each(function(i,n){
+                        var t=$('a:eq(0) span',$(n)).text();
+                        if(t != 'Home') {
+                            $('#tabs').tabs('close',t);
+                        }
+                    });
+                }
+                return false;
+            });
+            //关闭当前右侧的TAB
+            $('#mm-tabcloseright').click(function(){
+                var nextall = $('.tabs-selected').nextAll();
+                if(nextall.length==0){
+                    //msgShow('系统提示','后边没有啦~~','error');
+                    alert('后边没有啦~~');
+                    return false;
+                }
+                nextall.each(function(i,n){
+                    var t=$('a:eq(0) span',$(n)).text();
+                    $('#tabs').tabs('close',t);
+                });
+                return false;
+            });
+            //关闭当前左侧的TAB
+            $('#mm-tabcloseleft').click(function(){
+                var prevall = $('.tabs-selected').prevAll();
+                if(prevall.length==0){
+                    alert('到头了，前边没有啦~~');
+                    return false;
+                }
+                prevall.each(function(i,n){
+                    var t=$('a:eq(0) span',$(n)).text();
+                    $('#tabs').tabs('close',t);
+                });
+                return false;
+            });
+            //退出
+            $("#mm-exit").click(function(){
+                $('#mm').menu('hide');
+            })
+        }
+        function logout(){
+            $.messager.confirm('退出', '您确定现在退出吗？', function(r){
+                if(r) {
+                    window.location.href="logout";
+                }
+            });
+        }
+        function resetPWD(){
+            showMyWindow('修改密码', 'user/resetPwd', 420, 200);
+        }
+        function addMenu(url){
+
+        }
+        $(function() {
+            tabCloseEven();
+            $(".menu_tab").click(function(){
+                var $this = $(this);
+                var href = $this.attr('src');
+                var title = $this.text();
+                addTab(title, href);
+            });
+            $(".div2").click(function(){
+                $(this).next("div").slideToggle("slow")
+                    .siblings(".div3:visible").slideUp("slow");
+            });
+        });
+    </script>
+</head>
+<body class="easyui-layout" >
+<div region="north" border="true" class="cs-north">
+    <div class="cs-north-bg">
+        <div class="cs-north-logo">切币游戏管理系统</div>
+        <div class="cs-north-info">
+            您好,　<shiro:principal property="loginName"/>
+
+            <a href="javascript:logout();" class="easyui-linkbutton" data-options="plain:true" >退出</a>
+        </div>
+    </div>
+</div>
+<div region="west" border="true" split="true"  style="width: 200px" title="菜单导航" >
+    <ul>
+        <li shiro:hasRole="1"><a href="javascript:void(0);" src="admin/admin_list" class="menu_tab">管理员列表</a></li>
+        <li shiro:hasRole="1" style="margin-top: 20px"><a href="javascript:void(0);" src="admin/user_list" class="menu_tab">用户列表</a></li>
+        <li shiro:hasRole="1" style="margin-top: 20px"><a href="javascript:void(0);" src="admin/user_report" class="menu_tab">用户统计</a></li>
+        <li style="margin-top: 20px"><a href="javascript:void(0);" src="admin/user_edit" class="menu_tab">修改用户信息</a></li>
+    </ul>
+</div>
+<div id="mainPanle" region="center" border="true" >
+    <div id="tabs" class="easyui-tabs"  fit="true" border="false"  >
+        <div title="首页">
+            <div class="cs-home-remark">
+                <h1>欢迎登录切币游戏后台!</h1> <br/>
+            </div>
+        </div>
+    </div>
+</div>
+<div region="south" border="false" id="south"><center></center></div>
+<div id="mm" class="easyui-menu cs-tab-menu">
+    <div id="mm-tabupdate">刷新</div>
+    <div class="menu-sep"></div>
+    <div id="mm-tabclose">关闭</div>
+    <div id="mm-tabcloseother">关闭其他</div>
+    <div id="mm-tabcloseall">关闭全部</div>
+</div>
+</body>
+</html>

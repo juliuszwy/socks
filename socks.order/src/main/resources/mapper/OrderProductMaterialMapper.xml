@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scoks.order.mapper.OrderProductMaterialMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.scoks.order.entity.OrderProductMaterial">
+        <id column="id" property="id"/>
+        <result column="order_id" property="orderId"/>
+        <result column="product_id" property="productId"/>
+        <result column="material_id" property="materialId"/>
+        <result column="target_num" property="targetNum"/>
+        <result column="get_num" property="getNum"/>
+        <result column="creator" property="creator"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+
+        <result column="category" property="material.category"/>
+        <result column="colour" property="material.colour"/>
+        <result column="item_num" property="orderProduct.itemNum"/>
+        <result column="main_yarn" property="orderProduct.mainYarn"/>
+        <result column="lining_yarn" property="orderProduct.liningYarn"/>
+        <result column="size" property="orderProduct.size"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, order_id, product_id, material_id, target_num, get_num, creator, create_time, update_time
+    </sql>
+    <update id="updateGetNum">
+        update order_product_material
+        set get_num = get_num + #{getNum}
+        where id = #{id}
+    </update>
+
+    <update id="updateTargetNum">
+        update order_product_material
+        set target_num = #{targetNum}
+        where id = #{id}
+    </update>
+    <select id="listOrderProductMaterial" resultMap="BaseResultMap">
+        select a.* ,b.category,b.colour,
+        c.item_num ,c.main_yarn, c.lining_yarn, c.size
+        from order_product_material a
+        left join material b on a.material_id = b.id
+        left join order_product c on a.product_id = c.id
+        where 1=1
+        <if test="where.orderId!=null">
+            and a.`order_id` = #{where.orderId}
+        </if>
+        <if test="where.productId!=null">
+            and a.`product_id` = #{where.productId}
+        </if>
+        <if test="where.category!=null">
+            and b.`category` = #{where.category}
+        </if>
+        <if test="where.colour!=null">
+            and b.`colour` = #{where.colour}
+        </if>
+        order by b.id,a.product_id desc
+    </select>
+
+</mapper>

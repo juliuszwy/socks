@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scoks.order.mapper.OrderProductFinalizeMapper">
+    <select id="listOrderProductFinalize" resultType="com.scoks.order.entity.OrderProductFinalize">
+        select a.* from `order_product_finalize` a
+        where product_id = #{where.productId}
+        order by a.update_time desc
+    </select>
+</mapper>

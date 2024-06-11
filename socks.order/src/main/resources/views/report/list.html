@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="utf-8">
+    <title>注册和日活 统计</title>
+    <div th:include="../templates/head :: head"></div>
+    <script>
+        function doSearch(){
+            $('#tt').datagrid('load', {
+                dateLeft:$('#dateLeft').datebox("getValue"),
+                dateRight:$('#dateRight').datebox("getValue")
+            });
+        }
+
+        function dateFormat(value,row,index){
+            if (value>0) {
+                return formatDate(value);
+            }
+            return value;
+        }
+
+        function exportUserInfo(){
+            showConfirm(market.content.title, '你确定要导出吗', function(){
+                var data ={
+                    dateLeft:$('#dateLeft').datebox("getValue"),
+                    dateRight:$('#dateRight').datebox("getValue")
+                };
+                DownLoadFile({
+                    url:'user_report_export', //请求的url
+                    data:data//要发送的数据
+
+                });
+            });
+        }
+        var DownLoadFile = function (options) {
+            var config = $.extend(true, { method: 'post' }, options);
+            var $iframe = $('<iframe id="down-file-iframe" />');
+            var $form = $('<form target="down-file-iframe" method="' + config.method + '" />');
+            $form.attr('action', config.url);
+            for (var key in config.data) {
+                $form.append('<input type="hidden" name="' + key + '" value="' + config.data[key] + '" />');
+            }
+            $iframe.append($form);
+            $(document.body).append($iframe);
+            $form[0].submit();
+            $iframe.remove();
+        }
+
+    </script>
+</head>
+<body class="cmp-list-body">
+<div id="tb" style="padding:3px">
+    <span>时间:</span>
+    <input id="dateLeft" class="easyui-datebox"   style="line-height:20px;border:1px solid #ccc">-
+    <input id="dateRight" class="easyui-datebox"  style="line-height:20px;border:1px solid #ccc">
+    <a href="javascript:void(0)" class="easyui-linkbutton " data-options="iconCls:'icon-search'" onclick="doSearch();">查询</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" plain="true" onclick="exportUserInfo();">导出</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton"  plain="true"  id="export" style="visibility: hidden;"><span id="workFrame"></span></a>
+</div>
+<table id="tt" class="easyui-datagrid" title="玩家列表" iconCls="icon-auth"
+       url="user_report?json" toolbar="#tb" rownumbers="true"
+       singleSelect="true" pagination="true" fitColumns="true" pageSize="15" pageList="[15,30,60,80,100]" />
+<thead>
+<tr>
+    <th align="center" width="4%" field="createTime" formatter="dateFormat" sortable="true">日期</th>
+    <th align="center" width="6%" field="register">注册数</th>
+    <th align="center" width="6%" field="dailyActivity">日活</th>
+    <th align="center" width="6%" field="registerTotal">累计注册</th>
+</tr>
+</thead>
+</table>
+</body>
+</html>

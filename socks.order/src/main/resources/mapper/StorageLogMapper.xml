@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scoks.order.mapper.StorageLogMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.scoks.order.entity.StorageLog">
+        <id column="id" property="id"/>
+        <result column="tray" property="tray"/>
+        <result column="material_id" property="materialId"/>
+        <result column="num" property="num"/>
+        <result column="type" property="type"/>
+        <result column="manufactor" property="manufactor"/>
+        <result column="remarks" property="remarks"/>
+        <result column="creator" property="creator"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+
+
+        <result column="region" property="region"/>
+        <result column="creatorName" property="creatorName"/>
+        <result column="category" property="material.category"/>
+        <result column="colour" property="material.colour"/>
+    </resultMap>
+
+
+    <select id="listStorageLog" resultMap="BaseResultMap">
+        select a.*,b.category AS category,b.colour AS colour ,c.region
+        ,d.name AS creatorName
+        from storage_log a
+        left join material b on a.material_id = b.id
+        left join storage_region c on a.tray = c.tray
+        LEFT join staff d on a.creator = d.id
+        where 1=1
+        <if test="where.startTime!=null">
+            and a.create_time > #{where.startTime}
+        </if>
+        <if test="where.endTime!=null">
+            and #{where.endTime} > a.create_time
+        </if>
+        <if test="where.colour!=null">
+            and b.`colour` = #{where.colour}
+        </if>
+        <if test="where.category!=null">
+            and b.`category` = #{where.category}
+        </if>
+        <if test="where.tray!=null">
+            and a.`tray` = #{where.tray}
+        </if>
+        order by a.id desc
+    </select>
+
+</mapper>

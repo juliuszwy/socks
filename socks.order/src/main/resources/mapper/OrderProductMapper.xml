@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scoks.order.mapper.OrderProductMapper">
+
+    <resultMap id="ProductBaseResultMap" type="com.scoks.order.entity.OrderProduct">
+        <id column="product_id" property="orderProduct.id"/>
+
+        <result column="product_item_num" property="orderProduct.itemNum"/>
+        <result column="product_main_yarn" property="orderProduct.mainYarn"/>
+        <result column="product_lining_yarn" property="orderProduct.liningYarn"/>
+        <result column="product_size" property="orderProduct.size"/>
+    </resultMap>
+
+    <sql id="Reference_Base_Column_List">
+        op.id AS product_id, op.item_num AS product_item_num, op.main_yarn AS product_main_yarn, op.lining_yarn AS product_lining_yarn, op.size AS product_size
+    </sql>
+
+    <update id="updateOutTargetNum">
+        update order_product set out_target_num = if(out_target_num + #{num} &lt;0,0,out_target_num + #{num}),update_time = #{updateTime}
+        where id = #{id} and target_num >= out_target_num + #{num}
+    </update>
+    <update id="updateOutCompletedNum">
+        update order_product set out_completed_num = if(out_completed_num + #{num} &lt;0,0,out_completed_num + #{num}),update_time = #{updateTime}
+        where id = #{id}
+    </update>
+
+
+    <update id="updateCompletedNum">
+        update order_product set completed_num = if(completed_num + #{num} &lt;0,0,completed_num + #{num}),update_time = #{updateTime}
+        where id = #{id}
+    </update>
+    <update id="updateFinalizeNum">
+        update order_product set finalize_num = if(finalize_num + #{num} &lt;0,0,finalize_num + #{num}),update_time = #{updateTime}
+        where id = #{id}
+    </update>
+
+    <select id="listProduct" resultType="com.scoks.order.entity.OrderProduct">
+        select * from order_product
+        where 1=1
+        <if test="where.orderId!=null">
+            and order_id = #{where.orderId}
+        </if>
+        <if test="where.state!=null">
+            and state = #{where.state}
+        </if>
+        order by update_time desc
+
+    </select>
+
+
+    <select id="listProductGroupOut" resultType="com.scoks.order.entity.OrderProduct">
+        select a.id,a.target_num,a.completed_num,
+        a.partner_id,c.order_id,c.item_num,c.main_yarn,c.lining_yarn,c.size,b.name AS
+        partnerName from
+        `order_product_out` a
+        LEFT join partner b on a.partner_id = b.id
+        LEFT join order_product c on a.product_id = c.id
+        where a.order_id = #{where.orderId} and a.state = 0
+        <if test="where.partnerName!=null">
+            and b.name like concat('%',#{where.partnerName},'%')
+        </if>
+        order by a.product_id,a.update_time desc
+    </select>
+</mapper>

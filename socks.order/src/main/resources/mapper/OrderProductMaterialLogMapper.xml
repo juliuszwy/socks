@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scoks.order.mapper.OrderProductMaterialLogMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.scoks.order.entity.OrderProductMaterialLog">
+        <id column="id" property="id"/>
+        <result column="opm_id" property="opmId"/>
+        <result column="get_num" property="getNum"/>
+        <result column="creator" property="creator"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+
+        <result column="creator_name" property="creatorName"/>
+        <result column="category" property="material.category"/>
+        <result column="colour" property="material.colour"/>
+        <result column="item_num" property="orderProduct.itemNum"/>
+        <result column="main_yarn" property="orderProduct.mainYarn"/>
+        <result column="lining_yarn" property="orderProduct.liningYarn"/>
+        <result column="size" property="orderProduct.size"/>
+    </resultMap>
+
+    <resultMap id="StatisticsOrderMaterialMap" type="com.scoks.order.dto.OrderMaterialSumDTO">
+        <result column="targetNum" property="targetNum"/>
+        <result column="getNum" property="getNum"/>
+        <result column="storeNum" property="storeNum"/>
+        <result column="material_id" property="material.id"/>
+        <result column="category" property="material.category"/>
+        <result column="colour" property="material.colour"/>
+
+
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, order_id, opm_id, get_num, creator, create_time, update_time
+    </sql>
+    <select id="listOrderProductMaterialLogs" resultMap="BaseResultMap">
+        select a.*, c.item_num ,c.main_yarn, c.lining_yarn, c.size,
+        d.category,d.colour, f.name AS creator_name
+        from order_product_material_log a
+        left join order_product_material b on a.opm_id = b.id
+        left join order_product c on b.product_id = c.id
+        left join material d on b.material_id = d.id
+        left join staff f on a.creator = f.id
+        where 1=1
+        <if test="where.orderId!=null">
+            and b.`order_id` = #{where.orderId}
+        </if>
+        <if test="where.productId!=null">
+            and b.`product_id` = #{where.productId}
+        </if>
+        <if test="where.category!=null">
+            and d.`category` = #{where.category}
+        </if>
+        <if test="where.colour!=null">
+            and d.`colour` = #{where.colour}
+        </if>
+        order by a.id desc
+    </select>
+    <select id="statisticsStorageMaterialPageList" resultMap="StatisticsOrderMaterialMap">
+        select aa.targetNum,aa.getNum AS getNum,bb.sum AS storeNum
+        ,aa.material_id,bb.category ,bb.colour
+        from
+        (
+        select material_id,sum(target_num) AS targetNum,sum(get_num)AS getNum
+        from order_product_material
+        where order_id = #{where.orderId}
+        group by material_id
+        ) aa
+        left join (
+        select sum( a.count) AS sum, b.id AS material_id ,b.category ,b.colour
+        from storage_tray_material a
+        left join material b on a.material_id = b.id
+        where 1=1
+        and a.material_id in(
+        select material_id
+        from order_product_material
+        where order_id = #{where.orderId}
+        group by material_id
+        )
+        <if test="where.colour!=null">
+            and b.`colour` = #{where.colour}
+        </if>
+        <if test="where.category!=null">
+            and b.`category` = #{where.category}
+        </if>
+        group by a.material_id
+        ) bb on aa.material_id = bb.material_id
+
+        order by aa.targetNum-aa.getNum desc
+
+    </select>
+
+</mapper>

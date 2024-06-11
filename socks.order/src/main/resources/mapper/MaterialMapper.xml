@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scoks.order.mapper.MaterialMapper">
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.scoks.order.entity.Material">
+        <id column="id" property="id"/>
+        <result column="category" property="category"/>
+        <result column="colour" property="colour"/>
+        <result column="state" property="state"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <resultMap id="MaterialBaseResultMap" type="com.scoks.order.entity.Material">
+        <id column="material_id" property="material.id"/>
+        <result column="material_category" property="material.category"/>
+        <result column="material_colour" property="material.colour"/>
+    </resultMap>
+
+    <sql id="Reference_Base_Column_List">
+        m.id AS material_id, m.category AS material_category, m.colour AS material_colour
+    </sql>
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, category, colour, state, create_time, update_time
+    </sql>
+
+    <select id="findMaterialBaseById" resultMap="BaseResultMap">
+        select category,colour
+        from material
+        where id = #{id}
+    </select>
+
+    <select id="listMaterials" resultMap="BaseResultMap">
+        SELECT * from material
+        where state = 0
+        <if test="where.category!=null">
+            and `category` = #{where.category}
+        </if>
+        <if test="where.colour!=null">
+            and colour = #{where.colour}
+        </if>
+    </select>
+</mapper>

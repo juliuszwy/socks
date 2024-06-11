@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scoks.order.mapper.StorageTrayMaterialMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.scoks.order.entity.StorageTrayMaterial">
+        <id column="id" property="id"/>
+        <result column="tray" property="tray"/>
+        <result column="material_id" property="materialId"/>
+        <result column="count" property="count"/>
+        <result column="remarks" property="remarks"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+
+        <result column="region" property="region"/>
+        <result column="category" property="material.category"/>
+        <result column="colour" property="material.colour"/>
+    </resultMap>
+
+    <resultMap id="StatisticsStorageMaterialMap" type="com.scoks.order.dto.MaterialSumDTO">
+        <result column="sum" property="sum"/>
+        <result column="material_id" property="material.id"/>
+        <result column="category" property="material.category"/>
+        <result column="colour" property="material.colour"/>
+        <result column="orderLackSum" property="orderLackSum"/>
+
+    </resultMap>
+
+    <update id="updateNum">
+        update storage_tray_material
+        set count = count + #{num}
+        where id = #{stmId}  and count + #{num} >= 0
+    </update>
+
+
+    <select id="storageTrayMaterials" resultMap="BaseResultMap">
+        select a.* ,b.category,b.colour,c.region
+        from storage_tray_material a
+        left join material b on a.material_id = b.id
+        left join storage_region c on a.tray = c.tray
+        where 1=1
+        <if test="where.region!=null">
+            and c.`region` = #{where.region}
+        </if>
+        <if test="where.tray!=null">
+            and c.`tray` = #{where.tray}
+        </if>
+        <if test="where.colour!=null">
+            and b.`colour` = #{where.colour}
+        </if>
+        <if test="where.category!=null">
+            and b.`category` = #{where.category}
+        </if>
+        order by a.tray
+    </select>
+    <select id="statisticsStorageMaterialPageList" resultMap="StatisticsStorageMaterialMap">
+        select aa.sum,if(bb.sum is null,0,bb.sum) AS orderLackSum,aa.material_id,aa.category ,aa.colour
+        from
+        (
+        select sum( a.count) AS sum, b.id AS material_id ,b.category ,b.colour
+        from storage_tray_material a
+        left join material b on a.material_id = b.id
+        where 1=1
+        <if test="where.colour!=null">
+            and b.`colour` = #{where.colour}
+        </if>
+        <if test="where.category!=null">
+            and b.`category` = #{where.category}
+        </if>
+        group by a.material_id
+        ) aa
+        left join (
+        select b.material_id,sum(if(b.target_num>b.get_num,b.target_num - b.get_num,0)) AS sum
+        from `order` a
+        left join order_product_material b on a.order_id = b.order_id
+        left join order_status c on a.order_id = c.order_id
+        where c.produce_state = 0
+        group by b.material_id
+        ) bb on aa.material_id = bb.material_id
+
+        order by bb.sum desc
+
+    </select>
+
+</mapper>

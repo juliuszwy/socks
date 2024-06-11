@@ -1,0 +1,269 @@
+/* 后台通用的一些CSS，用于区分easyui默认样式 */  
+.cmp-list-body {
+	width: 98%;
+	margin: 0 auto;
+	padding: 10px;
+	text-align: left;
+}
+.verticalInterval{
+	margin-top: 10px;
+};
+
+/* Start: 自定义文件选择input */
+.uploader{
+	position:relative;
+	display:inline-block;
+	overflow:hidden;
+	cursor:default;
+	padding:0;
+	margin:10px 0px;
+	-moz-box-shadow:0px 0px 5px #ddd;
+	-webkit-box-shadow:0px 0px 5px #ddd;
+	box-shadow:0px 0px 5px #ddd;
+	-moz-border-radius:5px;
+	-webkit-border-radius:5px;
+	border-radius:5px;
+}
+
+.filename{
+	float:left;
+	display:inline-block;
+	outline:0 none;
+	height:32px;
+	width:180px;
+	margin:0;
+	padding:8px 10px;
+	overflow:hidden;
+	cursor:default;
+	border:1px solid;
+	border-right:0;
+	font:9pt/100% Arial, Helvetica, sans-serif; color:#777;
+	text-shadow:1px 1px 0px #fff;
+	text-overflow:ellipsis;
+	white-space:nowrap;
+	-moz-border-radius:5px 0px 0px 5px;
+	-webkit-border-radius:5px 0px 0px 5px;
+	border-radius:5px 0px 0px 5px;
+	background:#f5f5f5;
+	background:-moz-linear-gradient(top, #fafafa 0%, #eee 100%);
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(0%,#fafafa), color-stop(100%,#f5f5f5));
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#fafafa', endColorstr='#f5f5f5',GradientType=0);
+	border-color:#ccc;
+	
+	-moz-box-shadow:0px 0px 1px #fff inset;
+	-webkit-box-shadow:0px 0px 1px #fff inset;
+	box-shadow:0px 0px 1px #fff inset;
+	
+	-moz-box-sizing:border-box;
+	-webkit-box-sizing:border-box;
+	box-sizing:border-box;
+}
+
+.button{
+	float:left;
+	height:32px;
+	display:inline-block;
+	outline:0 none;
+	padding:8px 12px;
+	margin:0;
+	cursor:pointer;
+	border:1px solid;
+	font:bold 9pt/100% Arial, Helvetica, sans-serif;
+	-moz-border-radius:0px 5px 5px 0px;
+	-webkit-border-radius:0px 5px 5px 0px;
+	border-radius:0px 5px 5px 0px;
+	-moz-box-shadow:0px 0px 1px #fff inset;
+	-webkit-box-shadow:0px 0px 1px #fff inset;
+	box-shadow:0px 0px 1px #fff inset;
+}
+
+.uploader input[type=file]{
+	position:absolute;
+	top:0; right:0; bottom:0;
+	border:0;
+	padding:0; margin:0;
+	height:30px;
+	cursor:pointer;
+	filter:alpha(opacity=0);
+	-moz-opacity:0;
+	-khtml-opacity: 0;
+	opacity:0;
+}
+
+input[type=button]::-moz-focus-inner{padding:0; border:0 none; -moz-box-sizing:content-box;}
+input[type=button]::-webkit-focus-inner{padding:0; border:0 none; -webkit-box-sizing:content-box;}
+input[type=text]::-moz-focus-inner{padding:0; border:0 none; -moz-box-sizing:content-box;}
+input[type=text]::-webkit-focus-inner{padding:0; border:0 none; -webkit-box-sizing:content-box;}
+
+.white .button{
+	color:#555;
+	text-shadow:1px 1px 0px #fff;
+	background:#ddd;
+	background:-moz-linear-gradient(top, #eeeeee 0%, #dddddd 100%);
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(0%,#eeeeee), color-stop(100%,#dddddd));
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#eeeeee', endColorstr='#dddddd',GradientType=0);
+	border-color:#ccc;
+}
+.white:hover .button{
+	background:#eee;
+	background:-moz-linear-gradient(top, #dddddd 0%, #eeeeee 100%);
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(0%,#dddddd), color-stop(100%,#eeeeee));
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#dddddd', endColorstr='#eeeeee',GradientType=0);
+}
+
+/* End: 自定义文件选择input */
+
+/** 右下角滚动条样式 */
+#dynamic-to-top {
+    background: url(../image/top.gif) repeat scroll 0 0 transparent;
+    bottom: 20px;
+    display: none;
+    height: 44px;
+    left: auto;
+    position: fixed;
+    right: 18px;
+    top: auto;
+    width: 44px;
+    z-index: 90;
+}
+
+/** 右上角删除和编辑图标按钮 */
+.btn-icon {
+	display: none;
+	cursor: pointer;
+	width: 16px;
+	height: 16px;
+	text-indent: -999em;
+	overflow: hidden;
+	position: absolute;
+}
+.hover .btn-icon {
+	display: block;
+	text-decoration: none;
+}
+.modify-link {
+	right: 25px;
+	top: 0px;
+	background: transparent url("/resources/image/pencil.png") no-repeat center top;
+}
+.delete-link {
+	right: 0px;
+	top: 0px;
+	background: transparent url("/resources/image/cancel.png") no-repeat center top;
+}
+.proTable{
+	 padding: 0;
+    margin: 0;   
+    border-collapse:collapse;
+}
+.proTable td {
+    border: 1px solid #C1DAD7;   
+    background: #fff;
+    font-size:11px;
+    padding: 6px 6px 6px 12px;
+    color: #4f6b72;
+    width:50px;
+}
+
+.proTable td.alt {
+    background: #F5FAFA;
+    color: #797268;
+}
+.tableDouble {
+	background: none repeat scroll 0 0 #ffffff;
+	position: relative;
+}
+
+.tableDouble  table {
+	width: 100%;
+	border-collapse: collapse;
+	border-spacing: 0;
+	border: 2px solid #E8E8E8;
+	table-layout: fixed;
+	
+}
+
+.tableDouble table tbody td:first-child {
+	text-align: right;
+	width: 150px;
+	padding: 0 15px 0 0px;
+	background-color: #F5F5F5;
+	
+}
+
+.tableDouble table tbody td:nth-child(3){
+	text-align: right;
+	width: 150px;
+	padding: 0 15px 0 0px;
+	background-color: #F5F5F5;
+}
+
+.tableDouble table tbody td {
+	font-size: 14px;
+	text-align: left;
+	width: 100%;
+	height: 35px;
+	table-layout: fixed;
+	border: 1px solid #E8E8E8;
+}
+.tableDouble table tbody td input {
+	height: 22px;
+	margin-left: 10px;
+}
+.tableDouble table tbody td textarea {
+	height: 22px;
+	margin-left: 10px;
+}
+.tableDouble table tbody td select {
+	height: 22px;
+	margin-left: 10px;
+}
+.tableDouble table tbody td :disabled
+{
+    float:left;
+    position: relative;
+    background-color: transparent;
+    height: 17px;
+    -webkit-appearance: none;
+    border-width:0px;
+    border-top-style: none; 
+    border-right-style: none; 
+    border-left-style: none; 
+    border-bottom-style: none;
+}
+.tableDouble table tbody td select.SelectList
+{
+    position: relative;
+    background-color: transparent;
+    TOP:   -2px;
+    left:-2px;
+    border-width: 0px;
+    border-top-style: none; 
+    border-right-style: none; 
+    border-left-style: none; 
+    border-bottom-style: none;
+    display:block;
+    height: 20px;
+    overflow:hidden;
+}
+.red{
+	color: red;
+}
+.btn3 {
+	border: 1px solid #9eb7cd;
+	color: #fff;
+	display: inline-block;
+	font-size: 12px;
+	padding: 5px 10px 5px 10px;
+	text-align: center;
+	border-radius: 4px;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	background: none repeat scroll 0 0 #849bb0;
+}
+.btn3:hover {
+	background: none repeat scroll 0 0 #33b9ff;
+}
+.hide{
+	display: none;
+}

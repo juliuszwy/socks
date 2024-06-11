@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scoks.order.mapper.CustomerMapper">
+    <select id="selectCustomer" resultType="com.scoks.order.entity.Customer">
+        select a.* ,b.name AS salesmanName ,c.key AS countryName from customer a
+        LEFT join staff b on a.salesman = b.id
+        LEFT join `dict` c on a.country = c.id
+        where 1=1
+        <if test="where.name!=null">
+            and a.name like concat('%',#{where.name},'%')
+        </if>
+        <if test="where.salesman!=null">
+            and salesman = ${where.salesman}
+        </if>
+        <if test="where.country!=null">
+            and country = ${where.country}
+        </if>
+    </select>
+
+</mapper>
