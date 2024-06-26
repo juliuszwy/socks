@@ -20,4 +20,10 @@ import java.util.List;
 public interface CustomerMapper extends BaseMapper<Customer> {
 
     List<Customer> selectCustomer(Page<Customer> page, @Param("where") Customer where);
+
+    List<Customer> listCustomerSalesman(@Param("list") List<Long> oids);
+
+    void deleteSalesman(Long id);
+
+    void insertSalesman(@Param("id") Long id, @Param("list") List<Long> sids);
 }

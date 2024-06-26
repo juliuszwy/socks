@@ -101,7 +101,12 @@ public class LoginController extends BaseController {
                         Iterator<Customer> iterator = customerList.iterator();
                         while (iterator.hasNext()) {
                             Customer customer = iterator.next();
-                            if (customer.getSalesman() != loginUser.getId()) {
+                            List<Staff> salesmans = customer.getSalesmans();
+                            List<Long> sids = new ArrayList<>();
+                            if (salesmans != null) {
+                                salesmans.forEach(s -> sids.add(s.getId()));
+                            }
+                            if (!sids.contains(loginUser.getId())) {
                                 iterator.remove();
                             }
                         }

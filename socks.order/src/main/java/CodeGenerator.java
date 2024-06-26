@@ -26,10 +26,13 @@ public class CodeGenerator {
 
         // 数据源配置
         DataSourceConfig dsc = new DataSourceConfig();
-        dsc.setUrl("jdbc:mysql://10.234.12.53:3306/hta_bbs?useUnicode=true&useSSL=false&characterEncoding=utf8");
+        //dsc.setUrl("jdbc:mysql://rm-bp1yl6rb60o62jm5f5o.mysql.rds.aliyuncs.com/scoks_test?useUnicode=true&useSSL=false&characterEncoding=utf8");
+        dsc.setUrl("jdbc:mysql://10.234.12.53:3306/hta_usercenter?useUnicode=true&useSSL=false&characterEncoding=utf8");
+
         // dsc.setSchemaName("public");
         dsc.setDriverName("com.mysql.jdbc.Driver");
         dsc.setUsername("root");
+        //dsc.setPassword("1qazxdr5Q!");
         dsc.setPassword("123456");
         mpg.setDataSource(dsc);
 

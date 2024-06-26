@@ -1,22 +1,20 @@
 package com.scoks.order.utils;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class Utils {
 
     public final static Pattern PATTERN_LOCAL_IP = Pattern.compile("(10|172|192)(\\.\\d{1,3}){3,5}$");
+
     public static String toDateString(Date date, String format) {
         SimpleDateFormat fmt = new SimpleDateFormat(format);
         return fmt.format(date);
     }
 
     public static long toDate(String date, String format) {
-        if(Utils.stringIsNullOrEmpty(date))return 0;
+        if (Utils.stringIsNullOrEmpty(date)) return 0;
         SimpleDateFormat fmt = new SimpleDateFormat(format);
         long time = 0l;
         try {
@@ -26,9 +24,17 @@ public class Utils {
         }
         return time;
     }
+
     public static boolean stringIsNullOrEmpty(String string) {
         return string == null || string.trim().length() < 1;
     }
+
+    @SuppressWarnings("rawtypes")
+    public static boolean collectionIsEmpty(Collection coll) {
+        return (coll == null || coll.isEmpty());
+    }
+
+
     public static List<String> toListString(List<Object> objs) {
         if (objs == null)
             return null;
@@ -41,6 +47,7 @@ public class Utils {
                 list.add(item.toString());
         return list;
     }
+
     public static List<String> toListString(String string) {
         List<String> list = new ArrayList<String>();
         if (!Utils.stringIsNullOrEmpty(string)) {
@@ -51,6 +58,24 @@ public class Utils {
         }
         return list;
     }
+
+    public static List<Long> toListLong(String string) {
+        if (string == null) {
+            return Collections.emptyList();
+        }
+        List<Long> list = new ArrayList<>();
+        if (!Utils.stringIsNullOrEmpty(string)) {
+            String[] lines = string.trim().split(",");
+            for (String item : lines) {
+                try {
+                    list.add(Long.parseLong(item));
+                } catch (Exception e) {
+                }
+            }
+        }
+        return list;
+    }
+
     public static String[] toArrayString(List<String> list) {
         if (list != null) {
             return list.toArray(new String[list.size()]);
@@ -61,11 +86,13 @@ public class Utils {
     public static String[] toArrayString(String string) {
         return toArrayString(string, ",");
     }
+
     public static String[] toArrayString(String string, String regex) {
         if (Utils.stringIsNullOrEmpty(string))
             return null;
         return string.split(regex);
     }
+
     public static boolean stringCompare(String string1, String string2) {
         if (string1 == null) {
             if (string2 == null)
@@ -76,6 +103,7 @@ public class Utils {
 
         return string1.equalsIgnoreCase(string2);
     }
+
     public static int toInt(Object data, int defaultValue) {
         try {
             if (data == null)
@@ -119,5 +147,41 @@ public class Utils {
             sb.append((char) intVal);
         }
         return sb.toString();
+    }
+
+    public static <T> String toString(T... keys) {
+        if (keys == null) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (T item : keys) {
+            if (item == null) {
+                continue;
+            }
+            sb.append("," + item.toString());
+        }
+
+        if (sb.length() > 0) {
+            return sb.substring(1);
+        }
+        return "";
+    }
+
+    public static <T> String toString(List<T> keys) {
+        if (keys == null) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (T item : keys) {
+            if (item == null) {
+                continue;
+            }
+            sb.append("," + item.toString());
+        }
+
+        if (sb.length() > 0) {
+            return sb.substring(1);
+        }
+        return "";
     }
 }

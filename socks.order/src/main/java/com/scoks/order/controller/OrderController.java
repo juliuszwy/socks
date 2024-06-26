@@ -27,7 +27,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/scoks/api/order")
@@ -335,26 +337,36 @@ public class OrderController extends BaseController {
         return orderService.selectOrderMaterialLackDTOPageList(page, materialId);
     }
 
-    //@RequiresAuthentication
+    @RequiresAuthentication
     @GetMapping(value = "/export")
-    //@RequiresRoles(value = {Constant.POSITION_SALESMAN, Constant.POSITION_BOSS, Constant.POSITION_DIRECTOR}, logical = Logical.OR)
-    public void export(HttpServletResponse response) {
+    @RequiresRoles(value = {Constant.POSITION_SALESMAN, Constant.POSITION_BOSS, Constant.POSITION_DIRECTOR}, logical = Logical.OR)
+    public void export(HttpServletResponse response, OrderQuery form) {
         Map<String, String> map = new LinkedHashMap<>();
-        map.put("a", "姓名");
-        map.put("b", "年龄");
-        map.put("c", "性别");
-        map.put("d", "出生日期");
-        Collection<Object> dataset = new ArrayList<Object>();
-        dataset.add(new ExportOrderDTO("", "", "", null));
-        dataset.add(new ExportOrderDTO(null, null, null, null));
-        dataset.add(new ExportOrderDTO("王五", "34", "男", new Date()));
+        map.put("orderNo", "订单号");
+        map.put("customer", "客户");
+        map.put("salesman", "销售员");
+        map.put("device", "机型");
+        map.put("sewingHead", "缝头");
+        map.put("itemNum", "款号");
+        map.put("mainYarn", "主纱");
+        map.put("liningYarn", "里纱");
+        map.put("size", "尺寸");
+        map.put("targetNum", "目标总数");
+        map.put("completedNum", "完成总数");
+        map.put("finalizeNum", "定型数");
+        map.put("outTargetNum", "外发目标总数");
+        map.put("outCompletedNum", "外发完成数");
+        map.put("produceState", "生产状态");
+        map.put("finalizeState", "定型状态");
+
+        List<ExportOrderDTO> exportOrderDTOS = orderService.selectExportData(form);
 
         String fileName = "订单";
         ServletOutputStream outputStream = null;
         try {
             response.setHeader("Content-disposition", "inline; filename = " + URLEncoder.encode(fileName, "utf-8") + ".xls");
             outputStream = response.getOutputStream();
-            ExcelUtil.exportExcel(map, dataset, outputStream);
+            ExcelUtil.exportExcel(map, exportOrderDTOS, outputStream);
         } catch (IOException e) {
             log.error("", e);
         }

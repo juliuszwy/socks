@@ -213,13 +213,6 @@
                     <include>**/*.txt</include>
                 </includes>
             </resource>
-            <resource>
-                <directory>${project.basedir}/../libs</directory>
-                <targetPath>BOOT-INF/lib/</targetPath>
-                <includes>
-                    <include>**/*.jar</include>
-                </includes>
-            </resource>
         </resources>
     </build>
 </project>

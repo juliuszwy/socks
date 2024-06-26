@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.scoks.order.Constant;
 import com.scoks.order.entity.Customer;
-import com.scoks.order.entity.Dict;
 import com.scoks.order.entity.Partner;
 import com.scoks.order.entity.Staff;
 import com.scoks.order.mapper.CustomerMapper;
@@ -19,6 +18,8 @@ import org.springframework.stereotype.Service;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class AdminServiceImpl {
@@ -93,25 +94,37 @@ public class AdminServiceImpl {
         return staffMapper.selectOne(new QueryWrapper<Staff>().eq("login_name", loginName).eq("state", 0));
     }
 
+    private void setSalesmans(List<Customer> customers) {
+        List<Long> cids = customers.stream().map(Customer::getId).collect(Collectors.toList());
+        if (!Utils.collectionIsEmpty(cids)) {
+            List<Customer> customerSalesmans = customerMapper.listCustomerSalesman(cids);
+            Map<Long, Customer> customerSalesmanMap = customerSalesmans.stream().collect(Collectors.toMap(Customer::getId, v -> v));
+            for (Customer customer : customers) {
+                Customer o = customerSalesmanMap.get(customer.getId());
+                if (o != null) {
+                    customer.setSalesmans(o.getSalesmans());
+                }
+            }
+        }
+    }
 
     public Page<Customer> findCustomerPageList(Page<Customer> page, Customer where) {
         List<Customer> customers = customerMapper.selectCustomer(page, where);
+        setSalesmans(customers);
         page.setRecords(customers);
         return page;
     }
 
+
     public Customer getCustomerById(Long id) {
-        Customer customer = customerMapper.selectById(id);
-        if (customer.getSalesman() != null) {
-            Staff staff = staffMapper.selectById(customer.getSalesman());
-            customer.setSalesmanName(staff.getName());
+        Customer where = new Customer();
+        where.setId(id);
+        List<Customer> customers = customerMapper.selectCustomer(null, where);
+        if (Utils.collectionIsEmpty(customers)) {
+            return null;
         }
-        if (customer.getCountry() != null) {
-            Dict dict = dictMapper.selectById(customer.getCountry());
-            if (dict != null)
-                customer.setCountryName(dict.getKey());
-        }
-        return customer;
+        setSalesmans(customers);
+        return customers.get(0);
     }
 
 
@@ -126,11 +139,16 @@ public class AdminServiceImpl {
             form.setUpdateTime(System.currentTimeMillis());
             customerMapper.updateById(form);
         }
-
+        customerMapper.deleteSalesman(form.getId());
+        List<Long> sids = Utils.toListLong(form.getSalesman());
+        if (!Utils.collectionIsEmpty(sids)) {
+            customerMapper.insertSalesman(form.getId(), sids);
+        }
     }
 
     public List<Customer> selectAllCustomers() {
         List<Customer> customers = customerMapper.selectCustomer(null, new Customer());
+        setSalesmans(customers);
         return customers;
     }
 

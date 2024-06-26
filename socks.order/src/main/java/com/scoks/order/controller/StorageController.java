@@ -13,6 +13,7 @@ import com.scoks.order.query.StorageLogQuery;
 import com.scoks.order.service.StorageServiceImpl;
 import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +29,7 @@ public class StorageController extends BaseController {
 
     @GetMapping("material")
     @RequiresAuthentication
+    @RequiresPermissions(value = {"material/list"})
     public Object listMaterial(Page<Material> page, Material form) throws Exception {
         return storageService.findMaterialPageList(page, form);
     }

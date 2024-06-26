@@ -6,7 +6,6 @@
         <id column="id" property="id"/>
         <result column="order_id" property="orderId"/>
         <result column="customer_id" property="customerId"/>
-        <result column="salesman_id" property="salesmanId"/>
         <result column="delivery_date" property="deliveryDate"/>
         <result column="urgent" property="urgent"/>
         <result column="device" property="device"/>
@@ -22,9 +21,7 @@
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
 
-        <result column="salesmanName" property="salesmanName"/>
         <result column="customerName" property="customerName"/>
-
 
         <result column="target_num" property="orderStatus.targetNum"/>
         <result column="completed_num" property="orderStatus.completedNum"/>
@@ -33,6 +30,12 @@
         <result column="finalize_num" property="orderStatus.finalizeNum"/>
         <result column="finalize_state" property="orderStatus.finalizeState"/>
         <result column="produce_state" property="orderStatus.produceState"/>
+
+        <collection property="salesmans" ofType="com.scoks.order.entity.Staff">
+            <result column="salesmanId" property="id"/>
+            <result column="salesmanName" property="name"/>
+        </collection>
+
     </resultMap>
 
     <resultMap id="OrderMaterialLackDetailMap" type="com.scoks.order.dto.OrderMaterialLackDTO">
@@ -43,34 +46,84 @@
         <result column="lackNum" property="lackNum"/>
     </resultMap>
 
+    <resultMap id="BaseResultMapSalesman" type="com.scoks.order.entity.Order">
+        <id column="id" property="id"/>
+        <collection property="salesmans" ofType="com.scoks.order.entity.Staff">
+            <result column="salesmanId" property="id"/>
+            <result column="salesmanName" property="name"/>
+        </collection>
+    </resultMap>
+
 
     <insert id="insertOrder" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
-        INSERT INTO `order`(order_id, customer_id, salesman_id,delivery_date,urgent,device,sewing_head,materials,other,`desc`,ext1,ext2,creator,state,urgent_time,create_time,update_time)
-        SELECT #{orderId},#{customerId},#{salesmanId},#{deliveryDate},#{urgent},#{device},#{sewingHead},#{materials},#{other},#{desc},#{ext1},#{ext2},#{creator},#{state},#{urgentTime},#{createTime},#{updateTime}
-        FROM DUAL WHERE NOT EXISTS(SELECT id FROM`order` WHERE order_id = #{orderId} and customer_id = #{customerId} and state = 0)
+        INSERT INTO `order`(order_id, customer_id, delivery_date, urgent, device, sewing_head, materials,
+                            other, `desc`, ext1, ext2, creator, state, urgent_time, create_time, update_time)
+        SELECT #{orderId},
+               #{customerId},
+               #{deliveryDate},
+               #{urgent},
+               #{device},
+               #{sewingHead},
+               #{materials},
+               #{other},
+               #{desc},
+               #{ext1},
+               #{ext2},
+               #{creator},
+               #{state},
+               #{urgentTime},
+               #{createTime},
+               #{updateTime}
+        FROM DUAL
+        WHERE NOT EXISTS(SELECT id
+                         FROM `order`
+                         WHERE order_id = #{orderId}
+                           and customer_id = #{customerId}
+                           and state = 0)
     </insert>
+
+    <select id="listOrderSalesman" resultMap="BaseResultMapSalesman">
+        select a.id,
+        s.name AS salesmanName,s.id AS salesmanId
+        from `order` a
+        LEFT join `order_salesman` b on a.id = b.order_id
+        LEFT join `staff` s on s.id = b.salesman_id
+        where a.id in
+        <foreach collection="list" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+
+
+    </select>
 
 
     <select id="listOrder" resultMap="BaseResultMap">
-        select a.* ,b.name AS salesmanName ,c.name AS customerName
+        select a.* ,c.name AS customerName
         ,d.target_num,d.completed_num,d.out_target_num,d.out_completed_num,d.finalize_num,d.finalize_state,d.produce_state
         from `order` a
-        LEFT join staff b on a.salesman_id = b.id
         LEFT join customer c on a.customer_id = c.id
         LEFT join order_status d on a.id = d.order_id
         <if test="where.itemNum !=null">
             LEFT join order_product e on a.id = e.order_id
         </if>
         where 1=1
-        <if test="where.salesmanName!=null">
-            and b.name like concat('%',#{where.salesmanName},'%')
+        <if test="where.salesmanName!=null or where.salesmanId!=null">
+            and a.id in (
+            select os.order_id from order_salesman os inner join staff s
+            on s.id = os.salesman_id
+            <if test="where.salesmanName!=null">
+                and s.name like concat('%',#{where.salesmanName},'%')
+            </if>
+            <if test="where.salesmanId!=null">
+                and os.salesman_id = #{where.salesmanId}
+            </if>
+            group by os.order_id
+            )
         </if>
         <if test="where.customerName!=null">
             and c.name like concat('%',#{where.customerName},'%')
         </if>
-        <if test="where.salesmanId!=null">
-            and a.salesman_id = #{where.salesmanId}
-        </if>
+
         <if test="where.customerId!=null">
             and a.customer_id = #{where.customerId}
         </if>
@@ -112,23 +165,116 @@
     </select>
 
 
-    <select id="getOrder" resultType="com.scoks.order.entity.Order">
-        select a.* ,b.name AS salesmanName ,c.name AS customerName from `order` a
-        LEFT join staff b on a.salesman_id = b.id
-        LEFT join customer c on a.customer_id = c.id
+    <select id="getOrder" resultMap="BaseResultMap">
+        select a.*
+             , c.name AS customerName
+             , s.id   AS salesmanId
+             , s.name AS salesmanName
+
+        from `order` a
+                 LEFT join `order_salesman` b on a.id = b.order_id
+                 LEFT join `staff` s on s.id = b.salesman_id
+                 LEFT join customer c on a.customer_id = c.id
         where a.id = #{id}
     </select>
 
 
     <select id="selectOrderMaterialLackDetail" resultMap="OrderMaterialLackDetailMap">
-        select a.order_id,b.material_id,d.category,d.colour
-             ,sum(if(b.target_num>b.get_num,b.target_num - b.get_num,0)) AS lackNum
+        select a.order_id
+             , b.material_id
+             , d.category
+             , d.colour
+             , sum(if(b.target_num > b.get_num, b.target_num - b.get_num, 0)) AS lackNum
         from `order` a
                  left join order_product_material b on a.order_id = b.order_id
                  left join order_status c on a.order_id = c.order_id
                  left join material d on b.material_id = d.id
-        where c.produce_state = 0 and b.material_id = #{materialId}
-        group by a.order_id,b.material_id
+        where c.produce_state = 0
+          and b.material_id = #{materialId}
+        group by a.order_id, b.material_id
         order by a.update_time desc
     </select>
+    <select id="selectExportData" resultType="com.scoks.order.dto.ExportOrderDTO">
+        select
+        a.id,a.order_id AS orderNo,a.device,a.sewing_head AS sewingHead
+        ,b.item_num AS itemNum,b.main_yarn AS mainYarn,b.lining_yarn AS liningYarn ,b.size
+        ,b.target_num AS targetNum,b.completed_num AS completedNum,b.finalize_num AS finalizeNum
+        ,b.out_target_num AS outTargetNum,b.out_completed_num AS outCompletedNum
+        ,c.name AS customer
+        ,if(d.finalize_state=0,'定型中','定型完成') AS finalizeState
+        ,if(d.produce_state=0,'生产中','生产完成') AS produceState
+        from `order` a
+        LEFT JOIN order_product b on a.id = b.order_id
+        LEFT join customer c on a.customer_id = c.id
+        LEFT join order_status d on a.id = d.order_id
+        where 1=1
+        <if test="where.salesmanName!=null or where.salesmanId!=null">
+            and a.id in (
+            select os.order_id from order_salesman os inner join staff s
+            on s.id = os.salesman_id
+            <if test="where.salesmanName!=null">
+                and s.name like concat('%',#{where.salesmanName},'%')
+            </if>
+            <if test="where.salesmanId!=null">
+                and os.salesman_id = #{where.salesmanId}
+            </if>
+            group by os.order_id
+            )
+        </if>
+        <if test="where.customerName!=null">
+            and c.name like concat('%',#{where.customerName},'%')
+        </if>
+
+        <if test="where.customerId!=null">
+            and a.customer_id = #{where.customerId}
+        </if>
+        <if test="where.state!=null">
+            and a.state = #{where.state}
+        </if>
+        <if test="where.state == null">
+            and a.state = 0
+        </if>
+
+        <if test="where.wbd != null">
+            and TRUNCATE((d.completed_num + d.out_completed_num)/d.target_num,4) > 0.97
+        </if>
+
+        <if test="where.orderId!=null">
+            and a.order_id like concat('%',#{where.orderId},'%')
+        </if>
+        <if test="where.id!=null">
+            and a.id = #{where.id}
+        </if>
+
+        <if test="where.out !=null">
+            and d.out_target_num > 0
+        </if>
+
+        <if test="where.produceState != null">
+            and d.produce_state = #{where.produceState}
+        </if>
+
+        <if test="where.finalizeState != null">
+            and d.finalize_state = #{where.finalizeState}
+        </if>
+
+        <if test="where.itemNum !=null">
+            and b.item_num like concat('%',#{where.itemNum},'%')
+        </if>
+        order by a.update_time desc
+    </select>
+
+
+    <delete id="deleteSalesman">
+        delete
+        from order_salesman
+        where order_id = #{id}
+    </delete>
+    <insert id="insertSalesman">
+        insert into order_salesman (order_id,salesman_id)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{id},#{item})
+        </foreach>
+    </insert>
 </mapper>

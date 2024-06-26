@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.util.List;
+
 /**
  * <p>
  * <p>
@@ -35,7 +37,6 @@ public class Customer extends BaseEntity {
      */
     private Long creator;
 
-    private Long salesman;
 
     private Integer state;
 
@@ -43,6 +44,11 @@ public class Customer extends BaseEntity {
 
     private Long updateTime;
 
+
+    @TableField(exist = false)
+    private List<Staff> salesmans;
+    @TableField(exist = false)
+    private String salesman;
     @TableField(exist = false)
     private String salesmanName;
     @TableField(exist = false)

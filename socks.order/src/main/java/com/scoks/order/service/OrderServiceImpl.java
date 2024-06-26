@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.scoks.order.Enums;
+import com.scoks.order.dto.ExportOrderDTO;
 import com.scoks.order.dto.OrderMaterialLackDTO;
 import com.scoks.order.dto.OrderMaterialSumDTO;
 import com.scoks.order.dto.OrderQuery;
@@ -12,6 +13,7 @@ import com.scoks.order.exception.ResultException;
 import com.scoks.order.exception.ResultStatus;
 import com.scoks.order.mapper.*;
 import com.scoks.order.query.OrderMaterialQuery;
+import com.scoks.order.utils.Utils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,8 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl {
@@ -66,6 +70,17 @@ public class OrderServiceImpl {
             form.setSalesmanId(user.getId());
         }
         List<Order> orders = orderMapper.listOrder(page, form);
+        List<Long> oids = orders.stream().map(Order::getId).collect(Collectors.toList());
+        if (!Utils.collectionIsEmpty(oids)) {
+            List<Order> orderSalesmans = orderMapper.listOrderSalesman(oids);
+            Map<Long, Order> orderSalesmanMap = orderSalesmans.stream().collect(Collectors.toMap(Order::getId, v -> v));
+            for (Order order : orders) {
+                Order o = orderSalesmanMap.get(order.getId());
+                if (o != null) {
+                    order.setSalesmans(o.getSalesmans());
+                }
+            }
+        }
         page.setRecords(orders);
         return page;
     }
@@ -128,6 +143,11 @@ public class OrderServiceImpl {
             }
             form.setUpdateTime(System.currentTimeMillis());
             orderMapper.updateById(form);
+        }
+        orderMapper.deleteSalesman(form.getId());
+        List<Long> sids = Utils.toListLong(form.getSalesman());
+        if (!Utils.collectionIsEmpty(sids)) {
+            orderMapper.insertSalesman(form.getId(), sids);
         }
         return oid;
 
@@ -559,7 +579,7 @@ public class OrderServiceImpl {
             form.setUpdateTime(System.currentTimeMillis());
             orderProductMaterialLogMapper.updateById(form);
             if (!orderMaterialLog.getGetNum().equals(form.getGetNum())) {
-                orderProductMaterialMapper.updateGetNum(orderMaterialLog.getOpmId(), form.getGetNum().subtract( orderMaterialLog.getGetNum()));
+                orderProductMaterialMapper.updateGetNum(orderMaterialLog.getOpmId(), form.getGetNum().subtract(orderMaterialLog.getGetNum()));
             }
 
         }
@@ -576,5 +596,42 @@ public class OrderServiceImpl {
         List<OrderMaterialSumDTO> materialSumDTOS = orderProductMaterialLogMapper.statisticsStorageMaterialPageList(page, form);
         page.setRecords(materialSumDTOS);
         return page;
+    }
+
+    public List<ExportOrderDTO> selectExportData(OrderQuery form) {
+        Subject currentUser = SecurityUtils.getSubject();
+        Staff user = (Staff) currentUser.getPrincipal();
+        if (form.getFinalizeState() == null && user.getPosition() == Enums.Position.FINALIZE.position()) {
+            form.setFinalizeState(0);
+        }
+        if (form.getProduceState() == null && user.getPosition() == Enums.Position.DIRECTOR.position()) {
+            form.setProduceState(0);
+        }
+        if (form.getOut() == null && user.getPosition() == Enums.Position.OUT.position()) {
+            form.setOut(true);
+        }
+        if (user.getPosition() == Enums.Position.SALESMAN.position()) {
+            form.setSalesmanId(user.getId());
+        }
+
+        List<ExportOrderDTO> orders = orderMapper.selectExportData(form);
+
+        List<Long> oids = orders.stream().map(ExportOrderDTO::getId).collect(Collectors.toList());
+        if (!Utils.collectionIsEmpty(oids)) {
+            List<Order> orderSalesmans = orderMapper.listOrderSalesman(oids);
+            Map<Long, Order> orderSalesmanMap = orderSalesmans.stream().collect(Collectors.toMap(Order::getId, v -> v));
+            for (ExportOrderDTO exportOrderDTO : orders) {
+                Order o = orderSalesmanMap.get(exportOrderDTO.getId());
+                if (o != null) {
+                    List<Staff> salesmans = o.getSalesmans();
+                    if (!Utils.collectionIsEmpty(salesmans)) {
+                        List<String> collect = salesmans.stream().map(Staff::getName).collect(Collectors.toList());
+                        exportOrderDTO.setSalesman(Utils.toString(collect));
+                    }
+                }
+            }
+        }
+        return orders;
+
     }
 }

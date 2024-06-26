@@ -37,10 +37,6 @@ public class Order implements Serializable {
      */
     private Long customerId;
 
-    /**
-     * 业务员id
-     */
-    private Integer salesmanId;
 
     private Long deliveryDate;
 
@@ -53,9 +49,7 @@ public class Order implements Serializable {
      * 设备
      */
     private String device;
-
     private String sewingHead;
-
     /**
      * 用料
      */
@@ -92,6 +86,10 @@ public class Order implements Serializable {
     private String customerName;
     @TableField(exist = false)
     private String salesmanName;
+    @TableField(exist = false)
+    private String salesman;
+    @TableField(exist = false)
+    private List<Staff> salesmans;
     @TableField(exist = false)
     private String itemNum;
 

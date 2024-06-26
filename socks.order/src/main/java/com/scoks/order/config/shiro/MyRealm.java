@@ -36,10 +36,13 @@ public class MyRealm extends AuthorizingRealm {
                 //添加角色
                 simpleAuthorizationInfo.addRole(role.getId() + "");
                 //添加权限
-                if (role.getPermissions() != null)
+                if (role.getPermissions() != null) {
                     for (Permissions permissions : role.getPermissions()) {
                         simpleAuthorizationInfo.addStringPermission(permissions.getPermissionsName());
                     }
+                } else {
+
+                }
             }
         return simpleAuthorizationInfo;
     }
@@ -57,8 +60,7 @@ public class MyRealm extends AuthorizingRealm {
             throw new ResultException(ResultStatus.FORBIDDEN);
         } else {
             ByteSource salt = ByteSource.Util.bytes(user.getSalt());
-            SimpleAuthenticationInfo simpleAuthenticationInfo = new SimpleAuthenticationInfo(user, user.getPassword(), salt, getName());
-            return simpleAuthenticationInfo;
+            return new SimpleAuthenticationInfo(user, user.getPassword(), salt, getName());
         }
     }
 
