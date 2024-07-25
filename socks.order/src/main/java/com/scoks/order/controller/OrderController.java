@@ -258,7 +258,7 @@ public class OrderController extends BaseController {
 
     @RequiresAuthentication
     @PostMapping(value = "/out_work_edit")
-    @RequiresRoles(value = {Constant.POSITION_OUT})
+    @RequiresRoles(value = {Constant.POSITION_OUT, Constant.POSITION_DIRECTOR}, logical = Logical.OR)
     public Object out_work_edit(OrderProductOutWork form) {
         Staff loginUser = getLoginUser();
         if (form.getId() == null) {
@@ -270,7 +270,7 @@ public class OrderController extends BaseController {
 
     @RequiresAuthentication
     @PostMapping(value = "/out_work_delete")
-    @RequiresRoles(value = {Constant.POSITION_OUT})
+    @RequiresRoles(value = {Constant.POSITION_OUT, Constant.POSITION_DIRECTOR}, logical = Logical.OR)
     public Object out_work_delete(Long id) {
         if (id == null) {
             throw new ResultException(ResultStatus.PARAM_ERR);

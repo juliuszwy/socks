@@ -66,9 +66,9 @@ public class OrderServiceImpl {
         if (form.getOut() == null && user.getPosition() == Enums.Position.OUT.position()) {
             form.setOut(true);
         }
-        if (user.getPosition() == Enums.Position.SALESMAN.position()) {
-            form.setSalesmanId(user.getId());
-        }
+//        if (user.getPosition() == Enums.Position.SALESMAN.position()) {
+//            form.setSalesmanId(user.getId());
+//        }
         List<Order> orders = orderMapper.listOrder(page, form);
         List<Long> oids = orders.stream().map(Order::getId).collect(Collectors.toList());
         if (!Utils.collectionIsEmpty(oids)) {
@@ -453,6 +453,7 @@ public class OrderServiceImpl {
     }
 
     public Page<OrderProductOutWork> findOrderProductOutWorkPageList(Page<OrderProductOutWork> page, OrderProductOutWork where) {
+        where.setState(0);
         orderProductOutWorkMapper.selectPage(page, new QueryWrapper<>(where));
         return page;
     }

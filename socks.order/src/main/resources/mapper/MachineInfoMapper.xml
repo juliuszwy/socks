@@ -5,14 +5,14 @@
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.scoks.order.entity.MachineInfo">
         <id column="id" property="id"/>
-        <result column="num" property="machineNum"/>
+        <result column="machine_num" property="machineNum"/>
         <result column="model" property="model"/>
         <result column="remarks" property="remarks"/>
         <result column="creator" property="creator"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
 
-
+        
         <result column="pin_num" property="machineModel.pinNum"/>
         <result column="pin_type" property="machineModel.pinType"/>
     </resultMap>
